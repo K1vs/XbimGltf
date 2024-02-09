@@ -47,6 +47,39 @@ namespace MainTests
             }
         }
 
+        [TestMethod]
+        [DeploymentItem(@"Xbim.Geometry.Engine32.dll")]
+        [DeploymentItem(@"Xbim.Geometry.Engine64.dll")]
+        [DeploymentItem(@"Files\OneWallTwoWindows.ifc")]
+        [DeploymentItem(@"Files\SingleWall.ifc")]
+        public void CanConvertTwoOneFiles()
+        {
+            var ifc1 = new FileInfo("OneWallTwoWindows.ifc");
+            var xbim1 = CreateGeometry(ifc1, true, false);
+
+            var ifc2 = new FileInfo("SingleWall.ifc");
+            var xbim2 = CreateGeometry(ifc2, true, false);
+
+            using (var s1 = IfcStore.Open(xbim1.FullName))
+            {
+                using (var s2 = IfcStore.Open(xbim2.FullName))
+                {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+
+                    var savename = Path.ChangeExtension(s1.FileName, ".gltf");
+                    var bldr = new Builder();
+                    bldr.Init();
+                    bldr.AddModel(s1, XbimMatrix3D.Identity);
+                    bldr.AddModel(s2, XbimMatrix3D.Identity);
+                    var ret = bldr.Build();
+                    glTFLoader.Interface.SaveModel(ret, savename);
+
+                    Debug.WriteLine($"Gltf Model exported to '{savename}' in {sw.ElapsedMilliseconds} ms.");
+                }
+            }
+        }
+
         private static FileInfo CreateGeometry(FileInfo f, bool mode, bool useAlternativeExtruder)
         {
             IfcStore.ModelProviderFactory.UseHeuristicModelProvider();

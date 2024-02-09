@@ -40,7 +40,7 @@ namespace Xbim.GLTF
             
         }
 
-        private void Init()
+        public void Init()
         {
             _indicesBuffer = new List<byte>();
             _coordinatesBuffer = new List<byte>();
@@ -327,6 +327,14 @@ namespace Xbim.GLTF
         public gltf.Gltf BuildInstancedScene(IModel model, XbimMatrix3D overallTransform, List<Type> exclude = null, HashSet<int> EntityLebels = null)
         {
             Init();
+
+            AddModel(model, overallTransform, exclude, EntityLebels);
+
+            return Build();
+        }
+
+        public void AddModel(IModel model, XbimMatrix3D overallTransform, List<Type> exclude = null, HashSet<int> EntityLebels = null)
+        {
             Dictionary<int, ShapeComponentIds> geometries = new Dictionary<int, ShapeComponentIds>();
 
             // this needs a previously meshed xbim file.
@@ -360,7 +368,7 @@ namespace Xbim.GLTF
                     }
 
                     // we start with a shape instance and then load its geometry.
-                    
+
                     // a product (e.g. wall or window) in the scene returns:
                     // - 1 node
                     //   - pointing to a mesh, with a transform
@@ -397,7 +405,7 @@ namespace Xbim.GLTF
                         var tMat = XbimMatrix3D.Multiply(inModelTransf, overallTransform);
 
                         tnode.Matrix = tMat.ToFloatArray();
-                        
+
                         // create mesh
                         var meshIndex = _meshes.Count;
                         targetMesh = new gltf.Mesh
@@ -412,7 +420,7 @@ namespace Xbim.GLTF
                         _nodes.Add(tnode);
                         _meshes.Add(targetMesh);
                     }
-                    
+
                     // now the geometry
                     //
                     IXbimShapeGeometryData shapeGeom = geomReader.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
@@ -440,15 +448,15 @@ namespace Xbim.GLTF
                     bool doubleMaterial = false;
                     var ShapeRepresentationItem = model.Instances[shapeGeom.IfcShapeLabel];
                     if (ShapeRepresentationItem != null)
-					{
+                    {
                         if (ShapeRepresentationItem is IIfcFaceBasedSurfaceModel ||
                             ShapeRepresentationItem is IIfcShellBasedSurfaceModel)
                             doubleMaterial = true;
                     }
                     if (doubleMaterial)
-					{
+                    {
                         _materials[materialIndex].DoubleSided = true;
-					}
+                    }
 
 
                     // note: at a first investigation it looks like the shapeInstance.Transformation is the same for all shapes of the same product
@@ -456,7 +464,7 @@ namespace Xbim.GLTF
                     {
                         // retain the information to reuse the map multiple times
                         //
-                        
+
                         // if g is not found in the dictionary then build it and add it
                         ShapeComponentIds components;
                         if (!geometries.TryGetValue(shapeGeom.ShapeLabel, out components))
@@ -501,8 +509,6 @@ namespace Xbim.GLTF
                 }
             }
             Debug.WriteLine($"added {iCnt} elements in {s.ElapsedMilliseconds}ms.");
-
-            return Build();
         }
 
         private void AddComponentsToMesh(gltf.Mesh targetMesh, ShapeComponentIds osgGeom, int materialIndex)

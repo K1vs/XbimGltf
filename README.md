@@ -127,3 +127,28 @@ The library is published under the terms of the CDDL 1.0, alternative license ag
 <b id="f1">[1]</b> Wieringa, R. J., 2014. Design Science Methodology for Information Systems and Software Engineering. Springer-Verlag, Berlin Heidelberg. ISBN 978-3-662-43838-1. URL http://www.springer.com/gb/book/9783662438381 (accessed 5.17.2018). [↩](#a1)
 
 <b id="f2">[2]</b> Assistant Secretary for Public Affairs, 2013. Use Cases [WWW Document]. Usability.gov. URL https://www.usability.gov/how-to-and-tools/methods/use-cases.html (accessed 9.26.20).[↩](#a2)
+
+
+# Fork info
+
+Original project [XbimGltf](https://github.com/xBimTeam/XbimGltf)
+
+Fork modification author: K1vs - [Personal page](https://github.com/K1vs)
+
+Changes:
+
+1) Added ability to add multiple IFC documents to single gltf file
+
+Changes usage:
+
+
+```
+var bldr = new Builder();
+bldr.Init();
+bldr.AddModel(s1, XbimMatrix3D.Identity);
+bldr.AddModel(s2, XbimMatrix3D.Identity);
+var ret = bldr.Build();
+glTFLoader.Interface.SaveModel(ret, savename);
+```
+
+where s1 and s2 are meshed models.
